@@ -4,19 +4,13 @@ namespace octet {
   class TreeString {
   private:
     //char* current;
-    //std::map<char[], char[]> conversion_table;
+    //std::map<char*, char*> conversion_table;
 
     //std::vector<char[]> history;
 
-
     std::string current;
-
-
   public:
-    TreeString(){
-      
-    
-    }
+    TreeString(){}
 
     void set_axiom(char * axiom) {
       current = axiom;

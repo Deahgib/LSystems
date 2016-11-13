@@ -15,7 +15,7 @@ namespace octet {
     ref<visual_scene> app_scene;
     Turtle turtle;
 
-    TreeString str;
+    TreeString fractal_code;
   public:
     /// this is called when we construct the class before everything is initialised.
     LSystems(int argc, char **argv) : app(argc, argv) {
@@ -26,18 +26,19 @@ namespace octet {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
 
-      str.set_axiom("A");
-      turtle.render(str.get_string());
+      fractal_code.set_axiom("A");
+      turtle.render(fractal_code.get_string());
     }
 
     /// this is called to draw the world
     void draw_world(int x, int y, int w, int h) {
       if (is_key_going_down(' ')) {
-        str.do_step();
+        fractal_code.do_step();
       }
 
+      // ---------- Render
       glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-      turtle.render(str.get_string());
+      turtle.render(fractal_code.get_string());
     }
   };
 }

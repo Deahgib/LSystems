@@ -23,6 +23,9 @@ namespace octet {
     float unit_length;
     float angle;
 
+    // Used to render only when the input string changes
+    unsigned int code_length;
+
     std::vector<point> all_points;
     std::vector<line> all_lines;
     std::vector<bearing> point_stack;
@@ -49,22 +52,22 @@ namespace octet {
 
       float dx, dy;
       switch (quadrant) {
-      case 1:
-        dx = unit_length * math::sin(remainder_angle);
-        dy = unit_length * math::cos(remainder_angle);
-        break;
-      case 2:
-        dx = unit_length * math::cos(remainder_angle);
-        dy = -unit_length * math::sin(remainder_angle);
-        break;
-      case 3:
-        dx = -unit_length * math::sin(remainder_angle);
-        dy = -unit_length * math::cos(remainder_angle);
-        break;
-      case 4:
-        dx = -unit_length * math::cos(remainder_angle);
-        dy = unit_length * math::sin(remainder_angle);
-        break;
+        case 1:
+          dx = unit_length * math::sin(remainder_angle);
+          dy = unit_length * math::cos(remainder_angle);
+          break;
+        case 2:
+          dx = unit_length * math::cos(remainder_angle);
+          dy = -unit_length * math::sin(remainder_angle);
+          break;
+        case 3:
+          dx = -unit_length * math::sin(remainder_angle);
+          dy = -unit_length * math::cos(remainder_angle);
+          break;
+        case 4:
+          dx = -unit_length * math::cos(remainder_angle);
+          dy = unit_length * math::sin(remainder_angle);
+          break;
       }
       point next_point;
       next_point.x = last_point.x + dx;
@@ -159,7 +162,7 @@ namespace octet {
 
   public:
     Turtle() {
-      reset();
+      code_length = 0;
       unit_length = 0.5f;
       origin.x = 0;
       origin.y = -0.5;
@@ -174,20 +177,23 @@ namespace octet {
       all_points.push_back(last_point);
     }
 
+    // tree here is the fractal we want to produce
+    void render(const char* code) {
+      if (strlen(code)>code_length) {
+        code_length = strlen(code);
+        while (true) {
+          reset();
 
-    void render(const char* string) {
-      
-      while (true) {
-        reset();
+          generate_tree(code);
 
-        generate_tree(string);
-
-        if (!is_tree_in_view()) {
-          unit_length = unit_length * 0.5f;
+          if (!is_tree_in_view()) {
+            unit_length = unit_length * 0.5f;
+          }
+          else {
+            break;
+          }
         }
-        else {
-          break;
-        }
+        printf("Generated new graphic\n");
       }
       draw_lines();
     }
