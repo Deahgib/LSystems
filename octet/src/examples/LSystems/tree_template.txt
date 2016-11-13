@@ -1,0 +1,16 @@
+branch:1
+leaf:0
+axiom:0
+rules:1>11,0>1[0]0
+angle:0
+pp-angle:20
+#
+# pp-angle is the push pop angle used when a push or pop is made [ ]
+# angle is the angle made by - +
+# Default control characters are:
+# [ ] - +    
+# Reserved characters are (these are used for file reading and loading the tree, should not be used as axiom or rule character):
+# , > :
+# 
+# ORDER IS IMPORTANT:
+# branch > leaf > axiom > rules > angle > pp-angle
