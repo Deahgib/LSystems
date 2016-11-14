@@ -2,8 +2,8 @@ branch:1
 leaf:0
 axiom:0
 rules:1>11,0>1[0]0
-angle:0
-pp-angle:20
+angle:60
+pp-angle:0
 #
 # pp-angle is the push pop angle used when a push or pop is made [ ]
 # angle is the angle made by - +

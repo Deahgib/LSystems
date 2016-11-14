@@ -62,10 +62,25 @@ namespace octet {
     key_ctrl,
     key_alt,
 
+    key_l_than = 60,
+    key_g_than = 62,
+
+    // Numbers from 48 -> 57
+    key_0 = 48,
+    key_1 = 49,
+    key_2 = 50,
+    key_3 = 51,
+    key_4 = 52,
+    key_5 = 53,
+    key_6 = 54,
+    key_7 = 55,
+    key_8 = 56,
+    key_9 = 57,
+
     // Keys require ASCII VAL - 32 
+    key_a = 97-32,
     key_r = 114-32,
     key_w = 119-32,
-    key_a = 97-32,
     key_s = 115-32,
     key_d = 100-32,
 

@@ -53,12 +53,15 @@ namespace octet {
 
 
       // Clear previous settings.
+      fractal_code.clear_rules();
+      turtle.clear();
       // Set branches
       // Set Leaves
+      
       // Set Axiom
       fractal_code.set_axiom(settings[2].c_str());
+      
       // Set rules
-      fractal_code.clear_rules();
       char *rule_str = const_cast<char*>(settings[3].c_str());
       char *rules = strtok(rule_str, ">,");
       while (rules != NULL) {
@@ -72,8 +75,24 @@ namespace octet {
 
         fractal_code.insert_rule(control, conv);
       }
+
       // Set angles
-      
+      float angle = std::stof(settings[4].c_str());
+      float pp_angle = std::stof(settings[5].c_str());
+      turtle.set_control_angles(angle, pp_angle);
+
+      // Set origin
+      char *origin_str = const_cast<char*>(settings[6].c_str());
+      char *origin = strtok(origin_str, ",");
+      while (origin != NULL) {
+        //printf("File rule: %c -> ", *rules);
+        float x = std::stof(origin);
+        origin = strtok(NULL, ",");
+        if (origin == NULL) break;
+        float y = std::stof(origin);
+        origin = strtok(NULL, ",");
+        turtle.set_origin(x, y);
+      }
     }
 
   public:
@@ -86,23 +105,107 @@ namespace octet {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
 
-      load_fractal_file("tree_template.txt");
-
-      //fractal_code.set_axiom("0");
-      //fractal_code.clear_rules();
-      //fractal_code.insert_rule('0', "1[0]0");
-      //fractal_code.insert_rule('1', "11");
+      load_fractal_file("fractals/dragon-curve.frac");
     }
 
     /// this is called to draw the world
     void draw_world(int x, int y, int w, int h) {
-      if (is_key_going_down(' ')) {
+      // The following chunk is preset hotkeys to load diffirent files.
+      if (is_key_going_up(key_1)) {
+        load_fractal_file("fractals/fractal-tree-a.frac");
+      }
+      if (is_key_going_up(key_2)) {
+        load_fractal_file("fractals/fractal-tree-b.frac");
+      }
+      if (is_key_going_up(key_3)) {
+        load_fractal_file("fractals/fractal-tree-c.frac");
+      }
+      if (is_key_going_up(key_4)) {
+        load_fractal_file("fractals/fractal-tree-d.frac");
+      }
+      if (is_key_going_up(key_5)) {
+        load_fractal_file("fractals/fractal-tree-e.frac");
+      }
+      if (is_key_going_up(key_6)) {
+        load_fractal_file("fractals/fractal-tree-f.frac");
+      }
+      if (is_key_going_up(key_7)) {
+        load_fractal_file("fractals/sierpinski-arrowhead.frac");
+      }
+      if (is_key_going_up(key_8)) {
+        load_fractal_file("fractals/sierpinski-triangle.frac");
+      }
+      if (is_key_going_up(key_9)) {
+        load_fractal_file("fractals/dragon-curve.frac");
+      }
+      if (is_key_going_up(key_0)) {
+        load_fractal_file("fractals/pythagoras-tree.frac");
+      }
+      if (is_key_going_up(' ')) {
         fractal_code.do_step();
       }
+      if (is_key_going_up(key_r)) {
+        turtle.clear();
+      }
+      if (is_key_going_up(key_left) && !is_key_down(key_shift)) {
+        float x, y;
+        turtle.get_origin(x, y);
+        x -= 0.1f;
+        turtle.set_origin(x, y);
+        turtle.force_generate();
+      }
+      if (is_key_going_up(key_right) && !is_key_down(key_shift)) {
+        float x, y;
+        turtle.get_origin(x, y);
+        x += 0.1f;
+        turtle.set_origin(x, y);
+        turtle.force_generate();
+      }
+      if (is_key_going_up(key_up)) {
+        float x, y;
+        turtle.get_origin(x, y);
+        y += 0.1f;
+        turtle.set_origin(x, y);
+        turtle.force_generate();
+      }
+      if (is_key_going_up(key_down)) {
+        float x, y;
+        turtle.get_origin(x, y);
+        y -= 0.1f;
+        turtle.set_origin(x, y);
+        turtle.force_generate();
+      }
 
+      if (is_key_going_up(key_left) && is_key_down(key_shift)) {
+        float a, pp_a;
+        turtle.get_control_angles(a, pp_a);
+        a = a - 1;
+        turtle.set_control_angles(a, pp_a);
+        turtle.force_generate();
+      }
+      if (is_key_going_up(key_right) && is_key_down(key_shift)) {
+        float a, pp_a;
+        turtle.get_control_angles(a, pp_a);
+        a = a + 1;
+        turtle.set_control_angles(a, pp_a);
+        turtle.force_generate();
+      }
       // ---------- Render
+      glClearColor(1,1,1,1);
       glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
       turtle.render(fractal_code.get_string());
+      
+      /*
+      glColor3f(1, 0, 0);
+      glBegin(GL_TRIANGLES);
+        glVertex2f(-1,1);
+        glVertex2f(-0.75,0.95); 
+        glVertex2f(0,0);
+
+        glVertex2f(-0.5,0.2);
+        glVertex2f(-1, 1);
+        glVertex2f(0, 0);
+      glEnd();*/
     }
   };
 }
