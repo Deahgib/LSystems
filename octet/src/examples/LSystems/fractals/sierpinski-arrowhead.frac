@@ -1,0 +1,7 @@
+branch:A,B
+leaf:0
+axiom:A
+rules:A>+B-A-B+,B>-A+B+A-
+angle:60
+pp-angle:0
+origin:-0.5,-0.5

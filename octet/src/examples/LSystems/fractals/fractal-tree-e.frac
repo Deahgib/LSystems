@@ -1,0 +1,7 @@
+branch:F,X
+leaf:0
+axiom:X
+rules:X>F[+X][-X]FX,F>FF
+angle:26
+pp-angle:0
+origin:0,-1

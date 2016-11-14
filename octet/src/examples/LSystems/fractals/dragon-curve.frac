@@ -1,0 +1,9 @@
+branch:F
+leaf:0
+axiom:Fx
+rules:x>x+yF+,y>-Fx-y
+angle:90
+pp-angle:0
+origin:-0.5,-0.5
+# Using lowercase letters as non draw varaiables for clarity.
+# Only F here is drawing 'forward'

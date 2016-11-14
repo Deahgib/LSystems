@@ -1,0 +1,7 @@
+branch:F
+leaf:0
+axiom:F
+rules:F>F[+F]F[-F][F]
+angle:20
+pp-angle:0
+origin:0,-1

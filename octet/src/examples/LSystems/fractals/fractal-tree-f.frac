@@ -1,0 +1,7 @@
+branch:A,B
+leaf:0
+axiom:A
+rules:A>B-[[A]+A]+B[+BA]-A,B>BB
+angle:25
+pp-angle:0
+origin:0,-1
