@@ -19,6 +19,14 @@ namespace octet {
       float r, g, b;
     };
 
+    // triangle is drawn clockwise, make sure p1->p2->p3 are in clockwise order.
+    struct triangle {
+      point p1;
+      point p2;
+      point p3;
+    };
+
+    // Turtle variables
     float facing_angle;
     float unit_length;
 
@@ -31,6 +39,9 @@ namespace octet {
 
     std::vector<point> all_points;
     std::vector<line> all_lines;
+    std::vector<triangle> all_leaves;
+
+    // Used to push and pop the turtle back to positions when drawing a structure with many loose ends like a tree
     std::vector<bearing> point_stack;
     point origin;
     point last_point;
@@ -83,7 +94,7 @@ namespace octet {
       for (char ch = *string; ch != 0; ch = *(++string)) {
         //printf("%c", ch);
 
-        if (ch == '1' || ch == 'F' || ch == 'A' || ch == 'B' || ch == 'X') {
+        if (ch == '1' || ch == 'F' || ch == 'A' || ch == 'B') {
           point next_point = get_next_projected_point();
           //draw_line(last_point, next_point);
           line l;
@@ -96,9 +107,11 @@ namespace octet {
           last_point = next_point;
           all_points.push_back(last_point);
         }
-        else if (ch == '0') {
+        else if (ch == '0' || ch == 'X') {
           point next_point = get_next_projected_point();
           //draw_line(last_point, next_point);
+          make_leaf(last_point, next_point);
+          /*
           line l;
           l.start = last_point;
           l.end = next_point;
@@ -106,6 +119,7 @@ namespace octet {
           l.g = 0.6f;
           l.b = 0.1f;
           all_lines.push_back(l);
+          */
           last_point = next_point;
           all_points.push_back(last_point);
         }
@@ -134,6 +148,38 @@ namespace octet {
       }
     }
 
+    void make_leaf(point start, point end) {
+      // Make diamond leaf.
+      // dx dy are the vector from start to end.
+      float dx = end.x - start.x;
+      float dy = end.y - start.y;
+      // Mid point of our vector
+      point mid;
+      mid.x = start.x + dx * 0.5f;
+      mid.y = start.y + dy * 0.5f;
+      // Normal vector to our line vector.
+      // | 0 -1 | normal vecotr transform
+      // | 1  0 | 
+      point normal;
+      normal.x = -dy;
+      normal.y = dx;
+      point vert1;
+      vert1.x = mid.x + normal.x * 0.25f;
+      vert1.y = mid.y + normal.y * 0.25f;
+      point vert2;
+      vert2.x = mid.x - normal.x * 0.25f;
+      vert2.y = mid.y - normal.y * 0.25f;
+      triangle tri;
+      tri.p1 = start;
+      tri.p2 = vert1;
+      tri.p3 = vert2;
+      all_leaves.push_back(tri);
+      tri.p1 = vert2;
+      tri.p2 = vert1;
+      tri.p3 = end;
+      all_leaves.push_back(tri);
+    }
+
     bool is_tree_in_view() {
       for (std::vector<point>::iterator itt = all_points.begin(); itt != all_points.end(); ++itt) {
         if (!is_in_range(*itt)) {
@@ -160,6 +206,18 @@ namespace octet {
       glEnd();
     }
 
+    void draw_leaves() {
+      glColor3f(0, 1, 0);
+      glBegin(GL_TRIANGLES);
+      for (std::vector<triangle>::iterator itt = all_leaves.begin(); itt != all_leaves.end(); ++itt) {
+        triangle tri = *itt;
+        glVertex2f(tri.p1.x, tri.p1.y);
+        glVertex2f(tri.p2.x, tri.p2.y);
+        glVertex2f(tri.p3.x, tri.p3.y);
+      }
+      glEnd();
+    }
+
     bool is_in_range(point p) {
       return (p.x >= -1 && p.x <= 1 && p.y >= -1 && p.y <= 1);
     }
@@ -169,6 +227,7 @@ namespace octet {
       last_point = origin;
       all_lines.clear();
       all_points.clear();
+      all_leaves.clear();
       all_points.push_back(last_point);
     }
 
@@ -221,7 +280,10 @@ namespace octet {
     void render(const char* code) {
       if (strlen(code)>code_length) {
         code_length = strlen(code);
-        while (true) {
+        // Only loop to a maximum of 20 tries 
+        unsigned int loop = 0;
+        while (loop < 20) {
+          ++loop;
           reset();
 
           generate_tree(code);
@@ -236,6 +298,7 @@ namespace octet {
         printf("Generated new graphic\n");
       }
       draw_lines();
+      draw_leaves();
     }
   };
 }

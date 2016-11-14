@@ -1,7 +1,7 @@
 branch:F
 leaf:0
 axiom:F
-rules:F>F[+F]F[-F]F
+rules:F>F[+0]F[-0]0,0>F[+0]F[-0]0
 angle:26
 pp-angle:0
 origin:0,-1

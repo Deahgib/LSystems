@@ -105,7 +105,7 @@ namespace octet {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
 
-      load_fractal_file("fractals/dragon-curve.frac");
+      load_fractal_file("fractals/fractal-tree-c.frac");
     }
 
     /// this is called to draw the world
@@ -147,14 +147,14 @@ namespace octet {
       if (is_key_going_up(key_r)) {
         turtle.clear();
       }
-      if (is_key_going_up(key_left) && !is_key_down(key_shift)) {
+      if (is_key_going_up(key_left) && !is_key_down(key_shift) && !is_key_down(key_ctrl)) {
         float x, y;
         turtle.get_origin(x, y);
         x -= 0.1f;
         turtle.set_origin(x, y);
         turtle.force_generate();
       }
-      if (is_key_going_up(key_right) && !is_key_down(key_shift)) {
+      if (is_key_going_up(key_right) && !is_key_down(key_shift) && !is_key_down(key_ctrl)) {
         float x, y;
         turtle.get_origin(x, y);
         x += 0.1f;
@@ -190,22 +190,27 @@ namespace octet {
         turtle.set_control_angles(a, pp_a);
         turtle.force_generate();
       }
+
+      if (is_key_going_up(key_left) && is_key_down(key_ctrl)) {
+        float a, pp_a;
+        turtle.get_control_angles(a, pp_a);
+        pp_a = pp_a - 1;
+        turtle.set_control_angles(a, pp_a);
+        turtle.force_generate();
+      }
+      if (is_key_going_up(key_right) && is_key_down(key_ctrl)) {
+        float a, pp_a;
+        turtle.get_control_angles(a, pp_a);
+        pp_a = pp_a + 1;
+        turtle.set_control_angles(a, pp_a);
+        turtle.force_generate();
+      }
+
       // ---------- Render
       glClearColor(1,1,1,1);
       glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
       turtle.render(fractal_code.get_string());
       
-      /*
-      glColor3f(1, 0, 0);
-      glBegin(GL_TRIANGLES);
-        glVertex2f(-1,1);
-        glVertex2f(-0.75,0.95); 
-        glVertex2f(0,0);
-
-        glVertex2f(-0.5,0.2);
-        glVertex2f(-1, 1);
-        glVertex2f(0, 0);
-      glEnd();*/
     }
   };
 }

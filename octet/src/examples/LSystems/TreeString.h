@@ -52,38 +52,7 @@ namespace octet {
           newString += *itt;
         }
       }
-      /*
-      for (std::string::iterator itt = current.begin(); itt != current.end(); ++itt) {
-        //printf("%c", *itt);
-
-        if (*itt == '0') {
-          newString += "1[0]0";
-        }
-        else if (*itt == '1') {
-          newString += "11";
-        }
-        else {
-          newString += *itt;
-        }
-      }
-      */
-      /*
-      for (std::string::iterator itt = current.begin(); itt != current.end(); ++itt) {
-        //printf("%c", *itt);
-
-        if (*itt == 'A') {
-          newString += "+B-A-B+";
-        }
-        else if (*itt == 'B') {
-          newString += "-A+B+A-";
-        }
-        else {
-          newString += *itt;
-        }
-      }*/
-
       current = newString;
-
       //printf("\nResult: %s\n", newString.c_str());
     }
   };

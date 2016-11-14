@@ -1,7 +1,7 @@
-branch:A,B
+branch:F
 leaf:0
-axiom:A
-rules:A>B-[[A]+A]+B[+BA]-A,B>BB
+axiom:0
+rules:0>F-[[0]+0]+F[+F0]-0,F>FF
 angle:25
 pp-angle:0
 origin:0,-1
