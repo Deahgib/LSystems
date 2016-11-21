@@ -17,6 +17,21 @@ namespace octet {
 
     TreeString fractal_code;
 
+    const char* load_file(const char* file_name) {
+      std::ifstream is(file_name);
+      if (is.bad() || !is.is_open()) return nullptr;
+      char buffer[2048];
+      // loop over lines
+      std::string out;
+      while (!is.eof()) {
+        is.getline(buffer, sizeof(buffer));
+        out += buffer;
+        out += "\n";
+      }
+      printf("%s", out.c_str());
+      return out.c_str();
+    }
+
     void load_fractal_file(const char* file_name) {
       std::vector<std::string> settings;
 
@@ -95,22 +110,7 @@ namespace octet {
       }
     }
 
-  public:
-    /// this is called when we construct the class before everything is initialised.
-    LSystems(int argc, char **argv) : app(argc, argv) {
-    }
-
-    /// this is called once OpenGL is initialized
-    void app_init() {
-      app_scene =  new visual_scene();
-      app_scene->create_default_camera_and_lights();
-
-      load_fractal_file("fractals/fractal-tree-c.frac");
-    }
-
-    /// this is called to draw the world
-    void draw_world(int x, int y, int w, int h) {
-      // The following chunk is preset hotkeys to load diffirent files.
+    void input() {
       if (is_key_going_up(key_1)) {
         load_fractal_file("fractals/fractal-tree-a.frac");
       }
@@ -191,6 +191,7 @@ namespace octet {
         turtle.force_generate();
       }
 
+      // steps the angle amount 
       if (is_key_going_up(key_left) && is_key_down(key_ctrl)) {
         float a, pp_a;
         turtle.get_control_angles(a, pp_a);
@@ -205,12 +206,30 @@ namespace octet {
         turtle.set_control_angles(a, pp_a);
         turtle.force_generate();
       }
+    }
+
+  public:
+    /// this is called when we construct the class before everything is initialised.
+    LSystems(int argc, char **argv) : app(argc, argv) {
+    }
+
+    /// this is called once OpenGL is initialized
+    void app_init() {
+      app_scene =  new visual_scene();
+      app_scene->create_default_camera_and_lights();
+
+      load_fractal_file("fractals/fractal-tree-c.frac");
+    }
+
+    /// this is called to draw the world
+    void draw_world(int x, int y, int w, int h) {
+      // The following chunk is preset hotkeys to load diffirent files.
+      input();
 
       // ---------- Render
       glClearColor(1,1,1,1);
       glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
       turtle.render(fractal_code.get_string());
-      
     }
   };
 }
