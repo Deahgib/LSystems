@@ -58,7 +58,12 @@ namespace octet {
         }
       }
       int quadrant = ( ( (int)facing_angle / 90) % 4) + 1;
-      float remainder_angle = (int)facing_angle % 90;
+      /* OLD WAY FMOD is faster than cast juggling.
+      float float_remainder = facing_angle - (float)((int)facing_angle);
+      printf("%f\n", float_remainder);
+      float remainder_angle = (float)((int)facing_angle % 90) + float_remainder;
+      */
+      float remainder_angle = fmod(facing_angle, 90);
       remainder_angle = get_radians(remainder_angle);
       //printf("\nAngle: %f\n", facing_angle);
       //printf("Quadrant: %i\n", quadrant);
@@ -158,7 +163,7 @@ namespace octet {
       mid.x = start.x + dx * 0.5f;
       mid.y = start.y + dy * 0.5f;
       // Normal vector to our line vector.
-      // | 0 -1 | normal vecotr transform
+      // | 0 -1 | normal vector transform
       // | 1  0 | 
       point normal;
       normal.x = -dy;
