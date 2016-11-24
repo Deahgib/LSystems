@@ -214,19 +214,20 @@ namespace octet {
 
     GLuint VBO;
     shader tree_shader;
+    shader leaf_shader;
     /// this is called once OpenGL is initialized
     void app_init() {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
 
-      load_fractal_file("fractals/fractal-tree-c.frac");
+      load_fractal_file("fractals/fractal-tree-d.frac");
 
 
       glGenBuffers(1, &VBO);
 
 
       tree_shader.init(load_file("shaders/tree.vert").c_str(), load_file("shaders/tree.frag").c_str());
-
+      leaf_shader.init(load_file("shaders/leaf.vert").c_str(), load_file("shaders/leaf.frag").c_str());
     }
 
     //TEMPORARY testing vars
@@ -312,19 +313,32 @@ namespace octet {
       turtle.render(fractal_code.get_string());
 
       // ---------- Render
-      glClearColor(1,1,1,1);
+      glClearColor(0,0,0,1);
       glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-      std::vector<GLfloat> vertices_v = turtle.get_branches_mesh();
 
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(GL_ARRAY_BUFFER, vertices_v.size(), &vertices_v[0], GL_STATIC_DRAW);
-      glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
-      glEnableVertexAttribArray(attribute_pos);
+      // Branches
+      std::vector<GLfloat> branches_vertices_v = turtle.get_branches_mesh();
+      if (branches_vertices_v.size() > 0) {
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, branches_vertices_v.size() * sizeof(GLfloat), &branches_vertices_v[0], GL_DYNAMIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+        glEnableVertexAttribArray(attribute_pos);
+        glUseProgram(tree_shader.get_program());
+        glDrawArrays(GL_LINES, 0, branches_vertices_v.size()/2);
+        glBindVertexArray(attribute_pos);
+      }
 
-      glUseProgram(tree_shader.get_program());
-
-      glDrawArrays(GL_LINES, 0, vertices_v.size());
-      glBindVertexArray(attribute_pos);
+      // Leaves
+      std::vector<GLfloat> leaves_vertices_v = turtle.get_leaves_mesh();
+      if (leaves_vertices_v.size() > 0) {
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, leaves_vertices_v.size() * sizeof(GLfloat), &leaves_vertices_v[0], GL_DYNAMIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+        glEnableVertexAttribArray(attribute_pos);
+        glUseProgram(leaf_shader.get_program());
+        glDrawArrays(GL_TRIANGLES, 0, leaves_vertices_v.size() / 2);
+        glBindVertexArray(attribute_pos);
+      }
     }
   };
 }

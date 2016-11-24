@@ -99,6 +99,7 @@ namespace octet {
 
     void generate_tree(const char* string) {
       branches_mesh.clear();
+      leaves_mesh.clear();
       for (char ch = *string; ch != 0; ch = *(++string)) {
         //printf("%c", ch);
 
@@ -181,6 +182,27 @@ namespace octet {
       point vert2;
       vert2.x = mid.x - normal.x * 0.25f;
       vert2.y = mid.y - normal.y * 0.25f;
+
+      leaves_mesh.push_back(start.x);
+      leaves_mesh.push_back(start.y);
+
+      leaves_mesh.push_back(vert1.x);
+      leaves_mesh.push_back(vert1.y);
+
+      leaves_mesh.push_back(vert2.x);
+      leaves_mesh.push_back(vert2.y);
+
+
+      leaves_mesh.push_back(end.x);
+      leaves_mesh.push_back(end.y);
+
+      leaves_mesh.push_back(vert2.x);
+      leaves_mesh.push_back(vert2.y);
+
+      leaves_mesh.push_back(vert1.x);
+      leaves_mesh.push_back(vert1.y);
+
+      
       triangle tri;
       tri.p1 = start;
       tri.p2 = vert1;
@@ -292,15 +314,11 @@ namespace octet {
     }
 
     std::vector<GLfloat> get_branches_mesh() {
-      std::vector<GLfloat> lines;
-      for (std::vector<line>::iterator itt = all_lines.begin(); itt != all_lines.end(); ++itt) {
-        line l = *itt;
-        lines.push_back(l.start.x);
-        lines.push_back(l.start.y);
-        lines.push_back(l.end.x);
-        lines.push_back(l.end.y);
-      }
-      return lines;
+      return branches_mesh;
+    }
+
+    std::vector<GLfloat> get_leaves_mesh() {
+      return leaves_mesh;
     }
 
     // tree here is the fractal we want to produce
