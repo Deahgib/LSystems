@@ -112,36 +112,47 @@ namespace octet {
     void input() {
       if (is_key_going_up(key_1)) {
         load_fractal_file("fractals/fractal-tree-a.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_2)) {
         load_fractal_file("fractals/fractal-tree-b.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_3)) {
         load_fractal_file("fractals/fractal-tree-c.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_4)) {
         load_fractal_file("fractals/fractal-tree-d.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_5)) {
         load_fractal_file("fractals/fractal-tree-e.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_6)) {
         load_fractal_file("fractals/fractal-tree-f.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_7)) {
         load_fractal_file("fractals/sierpinski-arrowhead.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_8)) {
         load_fractal_file("fractals/sierpinski-triangle.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_9)) {
         load_fractal_file("fractals/dragon-curve.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_0)) {
         load_fractal_file("fractals/pythagoras-tree.frac");
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(' ')) {
         fractal_code.do_step();
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_r)) {
         turtle.clear();
@@ -151,28 +162,28 @@ namespace octet {
         turtle.get_origin(x, y);
         x -= 0.1f;
         turtle.set_origin(x, y);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_right) && !is_key_down(key_shift) && !is_key_down(key_ctrl)) {
         float x, y;
         turtle.get_origin(x, y);
         x += 0.1f;
         turtle.set_origin(x, y);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_up)) {
         float x, y;
         turtle.get_origin(x, y);
         y += 0.1f;
         turtle.set_origin(x, y);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_down)) {
         float x, y;
         turtle.get_origin(x, y);
         y -= 0.1f;
         turtle.set_origin(x, y);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
 
       if (is_key_going_up(key_left) && is_key_down(key_shift)) {
@@ -180,14 +191,14 @@ namespace octet {
         turtle.get_control_angles(a, pp_a);
         a = a - 1;
         turtle.set_control_angles(a, pp_a);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_right) && is_key_down(key_shift)) {
         float a, pp_a;
         turtle.get_control_angles(a, pp_a);
         a = a + 1;
         turtle.set_control_angles(a, pp_a);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
 
       // steps the angle amount 
@@ -196,14 +207,14 @@ namespace octet {
         turtle.get_control_angles(a, pp_a);
         pp_a = pp_a - 1;
         turtle.set_control_angles(a, pp_a);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
       if (is_key_going_up(key_right) && is_key_down(key_ctrl)) {
         float a, pp_a;
         turtle.get_control_angles(a, pp_a);
         pp_a = pp_a + 1;
         turtle.set_control_angles(a, pp_a);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
     }
 
@@ -217,15 +228,10 @@ namespace octet {
     shader leaf_shader;
     /// this is called once OpenGL is initialized
     void app_init() {
-      app_scene =  new visual_scene();
-      app_scene->create_default_camera_and_lights();
 
       load_fractal_file("fractals/fractal-tree-d.frac");
-
-
+      turtle.generate(fractal_code.get_string());
       glGenBuffers(1, &VBO);
-
-
       tree_shader.init(load_file("shaders/tree.vert").c_str(), load_file("shaders/tree.frag").c_str());
       leaf_shader.init(load_file("shaders/leaf.vert").c_str(), load_file("shaders/leaf.frag").c_str());
     }
@@ -306,14 +312,11 @@ namespace octet {
         turtle.get_control_angles(a, pp_a);
         a = a - 0.5;
         turtle.set_control_angles(a, pp_a);
-        turtle.force_generate();
+        turtle.generate(fractal_code.get_string());
       }
 
-      // ---------- Generate new mesh if requested or string changed
-      turtle.render(fractal_code.get_string());
-
       // ---------- Render
-      glClearColor(0,0,0,1);
+      glClearColor(1,1,1,1);
       glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
       // Branches
@@ -339,6 +342,8 @@ namespace octet {
         glDrawArrays(GL_TRIANGLES, 0, leaves_vertices_v.size() / 2);
         glBindVertexArray(attribute_pos);
       }
+
+      //printf("Total Points: %i\n", branches_vertices_v.size()+ leaves_vertices_v.size());
     }
   };
 }

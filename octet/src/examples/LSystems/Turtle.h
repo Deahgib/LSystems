@@ -34,14 +34,11 @@ namespace octet {
     float angle;
     float pp_angle; // Push pop angle
 
-    // Used to render only when the input string changes
-    unsigned int code_length;
-
     std::vector<GLfloat> branches_mesh;
     std::vector<GLfloat> leaves_mesh;
-    std::vector<point> all_points;
-    std::vector<line> all_lines;
-    std::vector<triangle> all_leaves;
+    //std::vector<point> all_points;
+    //std::vector<line> all_lines;
+    //std::vector<triangle> all_leaves;
 
     // Used to push and pop the turtle back to positions when drawing a structure with many loose ends like a tree
     std::vector<bearing> point_stack;
@@ -102,39 +99,18 @@ namespace octet {
       leaves_mesh.clear();
       for (char ch = *string; ch != 0; ch = *(++string)) {
         //printf("%c", ch);
-
         if (ch == '1' || ch == 'F' || ch == 'A' || ch == 'B') {
           point next_point = get_next_projected_point();
           branches_mesh.push_back(last_point.x);
           branches_mesh.push_back(last_point.y);
           branches_mesh.push_back(next_point.x);
           branches_mesh.push_back(next_point.y);
-          //draw_line(last_point, next_point);
-          line l;
-          l.start = last_point;
-          l.end = next_point;
-          l.r = 0.4f;
-          l.g = 0.3f;
-          l.b = 0;
-          all_lines.push_back(l);
           last_point = next_point;
-          all_points.push_back(last_point);
         }
         else if (ch == '0' || ch == 'X') {
           point next_point = get_next_projected_point();
-          //draw_line(last_point, next_point);
           make_leaf(last_point, next_point);
-          /*
-          line l;
-          l.start = last_point;
-          l.end = next_point;
-          l.r = 0.1f;
-          l.g = 0.6f;
-          l.b = 0.1f;
-          all_lines.push_back(l);
-          */
           last_point = next_point;
-          all_points.push_back(last_point);
         }
         // Create junction and save current bearing.
         else if (ch == '[') {
@@ -185,24 +161,18 @@ namespace octet {
 
       leaves_mesh.push_back(start.x);
       leaves_mesh.push_back(start.y);
-
       leaves_mesh.push_back(vert1.x);
       leaves_mesh.push_back(vert1.y);
-
       leaves_mesh.push_back(vert2.x);
       leaves_mesh.push_back(vert2.y);
-
-
       leaves_mesh.push_back(end.x);
       leaves_mesh.push_back(end.y);
-
       leaves_mesh.push_back(vert2.x);
       leaves_mesh.push_back(vert2.y);
-
       leaves_mesh.push_back(vert1.x);
       leaves_mesh.push_back(vert1.y);
 
-      
+      /*
       triangle tri;
       tri.p1 = start;
       tri.p2 = vert1;
@@ -211,58 +181,29 @@ namespace octet {
       tri.p1 = vert2;
       tri.p2 = vert1;
       tri.p3 = end;
-      all_leaves.push_back(tri);
+      all_leaves.push_back(tri);*/
     }
 
     bool is_tree_in_view() {
-      for (std::vector<point>::iterator itt = all_points.begin(); itt != all_points.end(); ++itt) {
-        if (!is_in_range(*itt)) {
+      for (std::vector<GLfloat>::iterator itt = branches_mesh.begin(); itt != branches_mesh.end(); ++itt) {
+        if ((*itt) < -1 || (*itt) > 1) {
           return false;
         }
       }
-      return true;
-    }
-
-    void draw_lines() {
-      for (std::vector<line>::iterator itt = all_lines.begin(); itt != all_lines.end(); ++itt) {
-        line l = *itt;
-        glColor3f(l.r, l.g, l.b);
-        draw_line(l.start, l.end);
-        glColor3f(0, 0, 0);
+      for (std::vector<GLfloat>::iterator itt = leaves_mesh.begin(); itt != leaves_mesh.end(); ++itt) {
+        if ((*itt) < -1 || (*itt) > 1) {
+          return false;
+        }
       }
-    }
-
-    void draw_line(point start, point end) {
-      glLineWidth(1);
-      glBegin(GL_LINES);
-      glVertex2f(start.x, start.y);
-      glVertex2f(end.x, end.y);
-      glEnd();
-    }
-
-    void draw_leaves() {
-      glColor3f(0, 1, 0);
-      glBegin(GL_TRIANGLES);
-      for (std::vector<triangle>::iterator itt = all_leaves.begin(); itt != all_leaves.end(); ++itt) {
-        triangle tri = *itt;
-        glVertex2f(tri.p1.x, tri.p1.y);
-        glVertex2f(tri.p2.x, tri.p2.y);
-        glVertex2f(tri.p3.x, tri.p3.y);
-      }
-      glEnd();
-    }
-
-    bool is_in_range(point p) {
-      return (p.x >= -1 && p.x <= 1 && p.y >= -1 && p.y <= 1);
     }
 
     void reset() {
       facing_angle = 0;
       last_point = origin;
-      all_lines.clear();
-      all_points.clear();
-      all_leaves.clear();
-      all_points.push_back(last_point);
+      //all_lines.clear();
+      //all_points.clear();
+      //all_leaves.clear();
+      //all_points.push_back(last_point);
 
       branches_mesh.clear();
       leaves_mesh.clear();
@@ -270,7 +211,6 @@ namespace octet {
 
   public:
     Turtle() {
-      code_length = 0;
       unit_length = 0.5f;
       origin.x = 0;
       origin.y = -1;
@@ -278,17 +218,11 @@ namespace octet {
     }
 
     void clear() {
-      code_length = 0;
       unit_length = 0.5f;
       origin.x = 0;
       origin.y = -1;
       angle = pp_angle = 0;
       reset();
-    }
-
-    void force_generate() {
-      code_length = 0;
-      unit_length = 0.5f;
     }
 
     void get_control_angles(float &a, float &pp_a) {
@@ -322,28 +256,24 @@ namespace octet {
     }
 
     // tree here is the fractal we want to produce
-    void render(const char* code) {
-      if (strlen(code)>code_length) {
-        code_length = strlen(code);
-        // Only loop to a maximum of 20 tries 
-        unsigned int loop = 0;
-        while (loop < 20) {
-          ++loop;
-          reset();
+    void generate(const char* code) {
+      if(unit_length < 0.5f) unit_length *= 2;
+      // Only loop to a maximum of 5 tries 
+      unsigned int loop = 5;
+      while (loop < 20) {
+        ++loop;
+        reset();
 
-          generate_tree(code);
+        generate_tree(code);
 
-          if (!is_tree_in_view()) {
-            unit_length = unit_length * 0.5f;
-          }
-          else {
-            break;
-          }
+        if (!is_tree_in_view()) {
+          unit_length = unit_length * 0.5f;
         }
-        printf("Generated new graphic\n");
+        else {
+          break;
+        }
       }
-      //draw_lines();
-      //draw_leaves();
+      printf("Generated new graphic\n");
     }
   };
 }
