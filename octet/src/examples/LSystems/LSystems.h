@@ -4,7 +4,6 @@
 //
 // Modular Framework for OpenGLES2 rendering on multiple platforms.
 //
-
 #include "Turtle.h"
 #include "TreeString.h"
 
@@ -17,7 +16,7 @@ namespace octet {
 
     TreeString fractal_code;
 
-    const char* load_file(const char* file_name) {
+    std::string load_file(const char* file_name) {
       std::ifstream is(file_name);
       if (is.bad() || !is.is_open()) return nullptr;
       char buffer[2048];
@@ -28,8 +27,8 @@ namespace octet {
         out += buffer;
         out += "\n";
       }
-      printf("%s", out.c_str());
-      return out.c_str();
+      //printf("%s", out.c_str());
+      return out;
     }
 
     void load_fractal_file(const char* file_name) {
@@ -213,12 +212,21 @@ namespace octet {
     LSystems(int argc, char **argv) : app(argc, argv) {
     }
 
+    GLuint VBO;
+    shader tree_shader;
     /// this is called once OpenGL is initialized
     void app_init() {
       app_scene =  new visual_scene();
       app_scene->create_default_camera_and_lights();
 
       load_fractal_file("fractals/fractal-tree-c.frac");
+
+
+      glGenBuffers(1, &VBO);
+
+
+      tree_shader.init(load_file("shaders/tree.vert").c_str(), load_file("shaders/tree.frag").c_str());
+
     }
 
     //TEMPORARY testing vars
@@ -267,24 +275,6 @@ namespace octet {
           animate = false;
         }
       }
-      if (is_key_going_down(key_a)) {
-        if (!animate) {
-          /*
-          load_fractal_file("fractals/sierpinski-triangle.frac");
-          fractal_code.do_step();
-          fractal_code.do_step();
-          fractal_code.do_step();
-          fractal_code.do_step();
-          turtle.set_control_angles(180, 0);
-          turtle.set_origin(0, 0);
-          */
-          animate = true;
-        }
-        else {
-          animate = false;
-        }
-      }
-
       if (is_key_going_down(key_w)) {
         if (!animate) {
           load_fractal_file("fractals/fractal-tree-c.frac");
@@ -300,6 +290,16 @@ namespace octet {
         }
       }
 
+
+
+      if (is_key_going_down(key_a)) {
+        if (!animate) {
+          animate = true;
+        }
+        else {
+          animate = false;
+        }
+      }
       if (animate) {
         float a, pp_a;
         turtle.get_control_angles(a, pp_a);
@@ -308,10 +308,23 @@ namespace octet {
         turtle.force_generate();
       }
 
+      // ---------- Generate new mesh if requested or string changed
+      turtle.render(fractal_code.get_string());
+
       // ---------- Render
       glClearColor(1,1,1,1);
       glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-      turtle.render(fractal_code.get_string());
+      std::vector<GLfloat> vertices_v = turtle.get_branches_mesh();
+
+      glBindBuffer(GL_ARRAY_BUFFER, VBO);
+      glBufferData(GL_ARRAY_BUFFER, vertices_v.size(), &vertices_v[0], GL_STATIC_DRAW);
+      glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+      glEnableVertexAttribArray(attribute_pos);
+
+      glUseProgram(tree_shader.get_program());
+
+      glDrawArrays(GL_LINES, 0, vertices_v.size());
+      glBindVertexArray(attribute_pos);
     }
   };
 }

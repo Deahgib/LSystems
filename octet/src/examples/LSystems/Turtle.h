@@ -37,6 +37,8 @@ namespace octet {
     // Used to render only when the input string changes
     unsigned int code_length;
 
+    std::vector<GLfloat> branches_mesh;
+    std::vector<GLfloat> leaves_mesh;
     std::vector<point> all_points;
     std::vector<line> all_lines;
     std::vector<triangle> all_leaves;
@@ -96,11 +98,16 @@ namespace octet {
     }
 
     void generate_tree(const char* string) {
+      branches_mesh.clear();
       for (char ch = *string; ch != 0; ch = *(++string)) {
         //printf("%c", ch);
 
         if (ch == '1' || ch == 'F' || ch == 'A' || ch == 'B') {
           point next_point = get_next_projected_point();
+          branches_mesh.push_back(last_point.x);
+          branches_mesh.push_back(last_point.y);
+          branches_mesh.push_back(next_point.x);
+          branches_mesh.push_back(next_point.y);
           //draw_line(last_point, next_point);
           line l;
           l.start = last_point;
@@ -234,6 +241,9 @@ namespace octet {
       all_points.clear();
       all_leaves.clear();
       all_points.push_back(last_point);
+
+      branches_mesh.clear();
+      leaves_mesh.clear();
     }
 
   public:
@@ -281,6 +291,18 @@ namespace octet {
       y = origin.y;
     }
 
+    std::vector<GLfloat> get_branches_mesh() {
+      std::vector<GLfloat> lines;
+      for (std::vector<line>::iterator itt = all_lines.begin(); itt != all_lines.end(); ++itt) {
+        line l = *itt;
+        lines.push_back(l.start.x);
+        lines.push_back(l.start.y);
+        lines.push_back(l.end.x);
+        lines.push_back(l.end.y);
+      }
+      return lines;
+    }
+
     // tree here is the fractal we want to produce
     void render(const char* code) {
       if (strlen(code)>code_length) {
@@ -302,8 +324,8 @@ namespace octet {
         }
         printf("Generated new graphic\n");
       }
-      draw_lines();
-      draw_leaves();
+      //draw_lines();
+      //draw_leaves();
     }
   };
 }
