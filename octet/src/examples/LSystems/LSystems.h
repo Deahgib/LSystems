@@ -150,6 +150,8 @@ namespace octet {
         load_fractal_file("fractals/pythagoras-tree.frac");
         turtle.generate(fractal_code.get_string());
       }
+
+      // Evolves the fractal identity using the rules
       if (is_key_going_up(' ')) {
         fractal_code.do_step();
         turtle.generate(fractal_code.get_string());
@@ -186,6 +188,7 @@ namespace octet {
         turtle.generate(fractal_code.get_string());
       }
 
+      // Modulate the angle size for - and + commands with SHIFT + left or right arrows 
       if (is_key_going_up(key_left) && is_key_down(key_shift)) {
         float a, pp_a;
         turtle.get_control_angles(a, pp_a);
@@ -201,7 +204,7 @@ namespace octet {
         turtle.generate(fractal_code.get_string());
       }
 
-      // steps the angle amount 
+      // Modulate the push and pop angle size for - and + commands with CTRL + left or right arrows 
       if (is_key_going_up(key_left) && is_key_down(key_ctrl)) {
         float a, pp_a;
         turtle.get_control_angles(a, pp_a);
@@ -220,19 +223,20 @@ namespace octet {
 
   public:
     /// this is called when we construct the class before everything is initialised.
-    LSystems(int argc, char **argv) : app(argc, argv) {
-    }
+    LSystems(int argc, char **argv) : app(argc, argv) {}
 
-    GLuint VBO;
+    GLuint branches_buffer;
+    GLuint leaves_buffer;
     shader tree_shader;
     shader leaf_shader;
     /// this is called once OpenGL is initialized
     void app_init() {
-
-      load_fractal_file("fractals/fractal-tree-d.frac");
-      turtle.generate(fractal_code.get_string());
-      glGenBuffers(1, &VBO);
-      tree_shader.init(load_file("shaders/tree.vert").c_str(), load_file("shaders/tree.frag").c_str());
+      load_fractal_file("fractals/fractal-tree-c.frac"); // Loads a start up file ( c is my favorite )
+      // The file loading automaticaly populates the fractal_code with axioms, rules, etc, for us.
+      turtle.generate(fractal_code.get_string()); // To generate a mesh we call generate on the turtle. This generates for us all the points as a large float array (actually 2 arrays, one for leaves and one for branches)
+      glGenBuffers(1, &branches_buffer); // Sets up our vertex array buffer for rendering
+      glGenBuffers(1, &leaves_buffer);
+      tree_shader.init(load_file("shaders/tree.vert").c_str(), load_file("shaders/tree.frag").c_str()); // loads, compiles and links our shader programs
       leaf_shader.init(load_file("shaders/leaf.vert").c_str(), load_file("shaders/leaf.frag").c_str());
     }
 
@@ -297,8 +301,6 @@ namespace octet {
         }
       }
 
-
-
       if (is_key_going_down(key_a)) {
         if (!animate) {
           animate = true;
@@ -321,20 +323,20 @@ namespace octet {
 
       // Branches
       std::vector<GLfloat> branches_vertices_v = turtle.get_branches_mesh();
-      if (branches_vertices_v.size() > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+      if (branches_vertices_v.size() > 0 ) {
+        glBindBuffer(GL_ARRAY_BUFFER, branches_buffer);
         glBufferData(GL_ARRAY_BUFFER, branches_vertices_v.size() * sizeof(GLfloat), &branches_vertices_v[0], GL_DYNAMIC_DRAW);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
         glEnableVertexAttribArray(attribute_pos);
+
         glUseProgram(tree_shader.get_program());
-        glDrawArrays(GL_LINES, 0, branches_vertices_v.size()/2);
+        glDrawArrays(GL_LINES, 0, branches_vertices_v.size() / 2);
         glBindVertexArray(attribute_pos);
       }
-
       // Leaves
       std::vector<GLfloat> leaves_vertices_v = turtle.get_leaves_mesh();
       if (leaves_vertices_v.size() > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, leaves_buffer);
         glBufferData(GL_ARRAY_BUFFER, leaves_vertices_v.size() * sizeof(GLfloat), &leaves_vertices_v[0], GL_DYNAMIC_DRAW);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
         glEnableVertexAttribArray(attribute_pos);
@@ -342,7 +344,6 @@ namespace octet {
         glDrawArrays(GL_TRIANGLES, 0, leaves_vertices_v.size() / 2);
         glBindVertexArray(attribute_pos);
       }
-
       //printf("Total Points: %i\n", branches_vertices_v.size()+ leaves_vertices_v.size());
     }
   };

@@ -2,29 +2,16 @@
 namespace octet {
   class Turtle {
   private:
-
     struct point {
       float x;
       float y;
     };
-
     struct bearing {
       point pos;
       float angle;
     };
 
-    struct line {
-      point start;
-      point end;
-      float r, g, b;
-    };
-
-    // triangle is drawn clockwise, make sure p1->p2->p3 are in clockwise order.
-    struct triangle {
-      point p1;
-      point p2;
-      point p3;
-    };
+    const float DEFAULT_UNIT_LENGTH = 0.5f;
 
     // Turtle variables
     float facing_angle;
@@ -34,11 +21,9 @@ namespace octet {
     float angle;
     float pp_angle; // Push pop angle
 
+    // Render output
     std::vector<GLfloat> branches_mesh;
     std::vector<GLfloat> leaves_mesh;
-    //std::vector<point> all_points;
-    //std::vector<line> all_lines;
-    //std::vector<triangle> all_leaves;
 
     // Used to push and pop the turtle back to positions when drawing a structure with many loose ends like a tree
     std::vector<bearing> point_stack;
@@ -50,14 +35,17 @@ namespace octet {
     }
 
     point get_next_projected_point() {
-      // Translate negative values into positive counterparts eg -60' === +300'
+      // Translate negative values into positive counterparts eg -60' === +300' or '-540 === +180'
       if (facing_angle < 0) {
         while (facing_angle < 0) {
           facing_angle = 360 + facing_angle;
         }
       }
+      //  Quad 4 | Quad 1
+      // --------|--------
+      //  Quad 3 | Quad 2
       int quadrant = ( ( (int)facing_angle / 90) % 4) + 1;
-      /* OLD WAY FMOD is faster than cast juggling.
+      /* OLD WAY ! -- FMOD is faster than cast juggling.
       float float_remainder = facing_angle - (float)((int)facing_angle);
       printf("%f\n", float_remainder);
       float remainder_angle = (float)((int)facing_angle % 90) + float_remainder;
@@ -67,7 +55,6 @@ namespace octet {
       //printf("\nAngle: %f\n", facing_angle);
       //printf("Quadrant: %i\n", quadrant);
       //printf("Internal Angle: %i\n", remainder_angle);
-
       float dx, dy;
       switch (quadrant) {
         case 1:
@@ -171,17 +158,6 @@ namespace octet {
       leaves_mesh.push_back(vert2.y);
       leaves_mesh.push_back(vert1.x);
       leaves_mesh.push_back(vert1.y);
-
-      /*
-      triangle tri;
-      tri.p1 = start;
-      tri.p2 = vert1;
-      tri.p3 = vert2;
-      all_leaves.push_back(tri);
-      tri.p1 = vert2;
-      tri.p2 = vert1;
-      tri.p3 = end;
-      all_leaves.push_back(tri);*/
     }
 
     bool is_tree_in_view() {
@@ -197,32 +173,26 @@ namespace octet {
       }
     }
 
-    void reset() {
+    void reset_turtle() {
       facing_angle = 0;
       last_point = origin;
-      //all_lines.clear();
-      //all_points.clear();
-      //all_leaves.clear();
-      //all_points.push_back(last_point);
-
-      branches_mesh.clear();
-      leaves_mesh.clear();
     }
 
   public:
     Turtle() {
-      unit_length = 0.5f;
+      unit_length = DEFAULT_UNIT_LENGTH;
       origin.x = 0;
       origin.y = -1;
       angle = pp_angle = 0;
     }
 
+    // Used for debugging
     void clear() {
-      unit_length = 0.5f;
+      unit_length = DEFAULT_UNIT_LENGTH;
       origin.x = 0;
       origin.y = -1;
       angle = pp_angle = 0;
-      reset();
+      reset_turtle();
     }
 
     void get_control_angles(float &a, float &pp_a) {
@@ -238,8 +208,11 @@ namespace octet {
     }
 
     void set_origin(float x, float y) {
-      origin.x = x;
-      origin.y = y;
+      // The orign has to exist on the screen (for auto tree resizing purposes)
+      if (x >= -1 && x <= 1) 
+        origin.x = x;
+      if (y >= -1 && y <= 1)
+        origin.y = y;
     }
 
     void get_origin(float &x, float &y) {
@@ -247,31 +220,42 @@ namespace octet {
       y = origin.y;
     }
 
+    // Returns the mesh data for the branches
     std::vector<GLfloat> get_branches_mesh() {
       return branches_mesh;
     }
 
+    // Returns mesh data for the leaves
     std::vector<GLfloat> get_leaves_mesh() {
       return leaves_mesh;
     }
 
-    // tree here is the fractal we want to produce
+    // "tree" here is the fractal we want to produce
     void generate(const char* code) {
-      if(unit_length < 0.5f) unit_length *= 2;
-      // Only loop to a maximum of 5 tries 
-      unsigned int loop = 5;
-      while (loop < 20) {
-        ++loop;
-        reset();
+
+      if(unit_length < DEFAULT_UNIT_LENGTH) unit_length *= 2;
+
+      // Only loop to a maximum of 20 tries 
+      unsigned int loop = 0;
+      while (loop < 20) { // BREAK-OUT value if tree is stuck out of bounds
+        reset_turtle();
 
         generate_tree(code);
 
+        // Primitive resize logic
         if (!is_tree_in_view()) {
           unit_length = unit_length * 0.5f;
+          if (loop == 20)
+            unit_length = DEFAULT_UNIT_LENGTH;
         }
         else {
           break;
         }
+        ++loop;
+      }
+      if (loop >= 20) {
+        for (short i = 0; i < loop; i++)
+          unit_length *= 2.0f;
       }
       printf("Generated new graphic\n");
     }
